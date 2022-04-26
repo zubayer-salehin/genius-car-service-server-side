@@ -13,21 +13,6 @@ app.get('/', (req, res) => {
   res.send('Genius car services')
 })
 
-function verifyJWT(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).send({ message: "unauthorized access" })
-  }
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).send({ message: "forbidden access" })
-    }
-    req.decoded = decoded;
-    next();
-  })
-}
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.v95so.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -73,20 +58,13 @@ async function run() {
       const result = await userCollection.deleteOne(query);
       res.send(result);
     })
-    
-    // Orders
-    app.get("/orders", verifyJWT, async (req, res) => {
-      const decodedEmail = req.decoded.email
+
+    app.get("/orders", async (req, res) => {
       const email = req.query.email
-      if (email === decodedEmail) {
-        const query = { email: email }
-        const cursor = orderCollection.find(query)
-        const result = await cursor.toArray();
-        res.send(result);
-      }
-      else {
-        res.status(403).send({ message: "forbidden access" })
-      }
+      const query = { email: email }
+      const cursor = orderCollection.find(query)
+      const result = await cursor.toArray();
+      res.send(result);
     })
 
     app.post("/order", async (req, res) => {
