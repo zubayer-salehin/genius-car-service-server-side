@@ -30,15 +30,6 @@ async function run() {
       res.send(result)
     })
 
-    // Auth
-    app.post("/login", async (req, res) => {
-      const user = req.body;
-      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "1d"
-      })
-      res.send({ accessToken })
-    })
-
     app.get("/service/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) }
@@ -59,6 +50,7 @@ async function run() {
       res.send(result);
     })
 
+    // Orders
     app.get("/orders", async (req, res) => {
       const email = req.query.email
       const query = { email: email }
